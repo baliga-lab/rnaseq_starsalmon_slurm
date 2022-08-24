@@ -7,11 +7,21 @@ run on Slurm clusters
 
 ## Requirements
 
+  * Python 3
   * SLURM cluster
   * STAR >= 2.70 (https://github.com/alexdobin/STAR)
   * Salmon 0.13.1 (https://anaconda.org/bioconda/salmon/files)
   * trim_galore (https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)
   * htseq (https://htseq.readthedocs.io/en/master/)
+
+## Installation
+
+This set of script files is designed to be executed in the same directory. From the directory these
+files are located in, you can execute
+
+```
+$ ./submit_dir.sh <data-root> <resultdir>
+```
 
 
 ## Data preparation
