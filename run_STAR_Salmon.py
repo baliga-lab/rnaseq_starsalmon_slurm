@@ -10,17 +10,6 @@ import argparse
 
 DESCRIPTION = """run_STAR_SALMON.py - run STAR and Salmon"""
 
-# Input files
-# data and results directories
-# default paths
-GENOME_DIR = "/proj/omics4tb2/wwu/GlobalSearch/reference_genomes/past_smic"
-GENOME_FASTA = "%s/Past_Smic_merged_CDS_suffixed.fasta" % GENOME_DIR
-GENOME_GFF = "%s/past_smic.genome.annotation.gff3" % GENOME_DIR
-
-# We need to run Salmon 0.13.1 to make this work
-#STAR_PATH = "/users/sturkars/STAR-2.7.0a/bin/Linux_x86_64/STAR" # path to STAR executable
-
-
 ####################### Create results directories ###############################
 def create_dirs(data_trimmed_dir, fastqc_dir, results_dir, htseq_dir):
     dirs = [data_trimmed_dir, fastqc_dir, results_dir, htseq_dir]
@@ -102,12 +91,12 @@ def run_salmon_quant(results_dir, folder_name, genome_fasta):
 
 
 ####################### Run HTSEq Count ###############################
-def run_htseq(htseq_dir, results_dir, folder_name):
+def run_htseq(htseq_dir, results_dir, folder_name, genome_gff):
     print
     print('\033[33mRunning htseq-count! \033[0m')
     htseq_input = '%s/%s_star_Aligned.sortedByCoord.out.bam' %(results_dir, folder_name)
     cmd = 'htseq-count -s "reverse" -t "exon" -i "Parent" -r pos --max-reads-in-buffer 60000000 -f bam %s %s > %s/%s_htseqcounts.txt' %(htseq_input,
-                                                                                                                                        GENOME_GFF,htseq_dir,folder_name)
+                                                                                                                                        genome_gff,htseq_dir,folder_name)
     print('htseq-count run command:%s' %cmd)
     #os.system(cmd)
 
@@ -127,7 +116,7 @@ def create_genome_index(genome_dir, genome_fasta):
 
 ####################### Running the Pipeline ###############################
 
-def run_pipeline(data_folder, results_folder, genome_dir, genome_fasta):
+def run_pipeline(data_folder, results_folder, genome_dir, genome_fasta, genome_gff):
     folder_count = 1
 
     # Loop through each data folder
@@ -147,8 +136,6 @@ def run_pipeline(data_folder, results_folder, genome_dir, genome_fasta):
     data_trimmed_dir = "%s/%s/trimmed" % (results_folder,folder_name)
     fastqc_dir = "%s/%s/fastqc_results" % (results_folder,folder_name)
 
-    ## WW: TODO: Generalize the folder noame
-    #results_dir = "%s/%s/results_STAR_Salmon_Acerv_Smic-reefGenomics" %(results_folder,folder_name)
     results_dir = "%s/%s/results_STAR_Salmon" %(results_folder, folder_name)
     htseq_dir = "%s/htseqcounts" % (results_dir)
 
@@ -195,7 +182,7 @@ def run_pipeline(data_folder, results_folder, genome_dir, genome_fasta):
         run_salmon_quant(results_dir, folder_name, genome_fasta)
 
         # Run HTSeq count
-        run_htseq(htseq_dir, results_dir, folder_name)
+        run_htseq(htseq_dir, results_dir, folder_name, genome_gff)
 
         folder_count += 1
 
@@ -205,6 +192,7 @@ def run_pipeline(data_folder, results_folder, genome_dir, genome_fasta):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description=DESCRIPTION)
+    parser.add_argument('genomedir', help='genome directory')
     parser.add_argument('dataroot', help="parent of input directory")
     parser.add_argument('indir', help="input directory (R<somenumber>)")
     parser.add_argument('outdir', help='output directory')
@@ -214,5 +202,8 @@ if __name__ == '__main__':
     timeprint = now.strftime("%Y-%m-%d %H:%M")
     data_folder = "%s/%s" % (args.dataroot, args.indir)
 
-    create_genome_index(GENOME_DIR, GENOME_FASTA)
-    data_trimmed_dir,fastqc_dir,results_dir = run_pipeline(data_folder, args.outdir, GENOME_DIR, GENOME_FASTA)
+    genome_fasta = "%s/Past_Smic_merged_CDS_suffixed.fasta" % args.genomedir
+    genome_gff = "%s/past_smic.genome.annotation.gff3" % args.genomedir
+
+    create_genome_index(args.genomedir, genome_fasta)
+    data_trimmed_dir,fastqc_dir,results_dir = run_pipeline(data_folder, args.outdir, args.genomedir, genome_fasta, genome_gff)

@@ -4,8 +4,9 @@
 #SBATCH -o logs/"%j".out
 #SBATCH -e logs/"%j".out
 
-data_root="$1"
-data_folder="$2"
-out_folder="$3"
-./run_STAR_Salmon.py $data_root $data_folder $out_folder
+genome_dir="$1"
+data_root="$2"
+data_folder="$3"
+out_folder="$4"
+./run_STAR_Salmon.py $genome_dir $data_root $data_folder $out_folder
 

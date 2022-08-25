@@ -20,9 +20,8 @@ This set of script files is designed to be executed in the same directory. From 
 files are located in, you can execute
 
 ```
-$ ./submit_dir.sh <data-root> <resultdir>
+$ ./submit_dir.sh <genomedata> <data-root> <resultdir>
 ```
-
 
 ## Data preparation
 
@@ -39,7 +38,7 @@ The file should therefore contain
 ### RNA Seq FASTQ folders
 
 ```
-$ ./submit_dir.sh <data-root> <resultdir>
+$ ./submit_dir.sh <genomedata> <data-root> <resultdir>
 ```
 
 The `submit_dir.sh` command takes a data root directory and a result directory
